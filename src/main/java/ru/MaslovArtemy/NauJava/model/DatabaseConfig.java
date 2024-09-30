@@ -5,15 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 @Configuration
 public class DatabaseConfig {
     @Bean
     @Scope(value = BeanDefinition.SCOPE_SINGLETON)
-    public List<User> userContainer()
+    public HashMap<Long, Transaction> transactionContainer()
     {
-        return new ArrayList<>();
+        return new HashMap<>();
     }
 }

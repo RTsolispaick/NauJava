@@ -9,8 +9,12 @@ import java.util.Scanner;
 
 @Configuration
 public class CommandLineConfig {
+    private final CommandProcessor commandProcessor;
+
     @Autowired
-    private CommandProcessor commandProcessor;
+    public CommandLineConfig(CommandProcessor commandProcessor) {
+        this.commandProcessor = commandProcessor;
+    }
 
     @Bean
     public CommandLineRunner commandScanner() {
@@ -19,15 +23,14 @@ public class CommandLineConfig {
             try (Scanner scanner = new Scanner(System.in)) {
                 System.out.println("Введите команду. 'exit' для выхода.");
                 while (true) {
-// Показать приглашение для ввода
                     System.out.print("> ");
                     String input = scanner.nextLine();
-// Выход из цикла, если введена команда "exit"
+
                     if ("exit".equalsIgnoreCase(input.trim())) {
                         System.out.println("Выход из программы...");
                         break;
                     }
-// Обработка команды
+
                     commandProcessor.processCommand(input);
                 }
             }

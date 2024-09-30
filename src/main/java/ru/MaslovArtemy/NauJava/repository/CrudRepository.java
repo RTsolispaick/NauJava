@@ -1,12 +1,17 @@
 package ru.MaslovArtemy.NauJava.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface CrudRepository<T, ID> {
     void create(T entity);
 
-    T read(ID id);
+    Optional<T> read(ID id);
 
-    void update(T entity);
+    Optional<List<T>> readAll();
 
-    void delete(ID id);
+    void update(T entity) throws IllegalStateException;
+
+    void delete(ID id) throws IllegalStateException;
 }
 

@@ -22,7 +22,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void createTransaction(Double amount, String category, LocalDate date, Transaction.Type type, String description) {
-        transactionRepository.create(new Transaction(amount,
+        transactionRepository.create(new Transaction(null, amount,
                 category,
                 date,
                 type,

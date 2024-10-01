@@ -22,8 +22,7 @@ public class TransactionRepository implements CrudRepository<Transaction, Long> 
 
     @Override
     public void create(Transaction transaction) {
-        transaction.setId(nextId++);
-        transactionContainer.put(transaction.getId(), transaction);
+        transactionContainer.put(nextId, transaction.setId(nextId++));
     }
 
     @Override
@@ -38,10 +37,10 @@ public class TransactionRepository implements CrudRepository<Transaction, Long> 
 
     @Override
     public void update(Transaction transaction) throws IllegalStateException {
-        if (transactionContainer.get(transaction.getId()) == null) {
-            throw new IllegalStateException("Транзакции с индексом " + transaction.getId() + " не существует!");
+        if (transactionContainer.get(transaction.id()) == null) {
+            throw new IllegalStateException("Транзакции с индексом " + transaction.id() + " не существует!");
         }
-        transactionContainer.put(transaction.getId(), transaction);
+        transactionContainer.put(transaction.id(), transaction);
     }
 
     @Override

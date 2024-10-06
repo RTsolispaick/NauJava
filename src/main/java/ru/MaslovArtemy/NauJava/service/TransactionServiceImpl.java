@@ -1,57 +1,83 @@
 package ru.MaslovArtemy.NauJava.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.MaslovArtemy.NauJava.model.Budget;
+import ru.MaslovArtemy.NauJava.model.Category;
 import ru.MaslovArtemy.NauJava.model.Transaction;
+import ru.MaslovArtemy.NauJava.model.User;
+import ru.MaslovArtemy.NauJava.repository.BudgetRepository;
+import ru.MaslovArtemy.NauJava.repository.CategoryRepository;
 import ru.MaslovArtemy.NauJava.repository.TransactionRepository;
+import ru.MaslovArtemy.NauJava.repository.UserRepository;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Date;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final BudgetRepository budgetRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UserRepository userRepository,
+                                  BudgetRepository budgetRepository, CategoryRepository categoryRepository) {
         this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
+        this.budgetRepository = budgetRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
-    public void createTransaction(Double amount, String category, LocalDate date, Transaction.Type type, String description) {
-        transactionRepository.create(new Transaction(null, amount,
-                category,
-                date,
-                type,
-                description));
+    @Transactional
+    public Transaction createTransaction(Float amount, Date date, String description, String type, Long userId, Long budgetId, Long categoryId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Поиск бюджета по budgetId
+        Budget budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
+
+        // Поиск категории по categoryId
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+        // Создание и сохранение транзакции
+        Transaction transaction = new Transaction(amount, date, description, type, user, budget, category);
+        return transactionRepository.save(transaction);
     }
 
     @Override
-    public Optional<Transaction> findById(Long id) {
-        return transactionRepository.read(id);
+    public Optional<Transaction> getTransactionById(Long id) {
+        return transactionRepository.findById(id);
     }
 
     @Override
-    public Optional<List<Transaction>> getAll() {
-        return transactionRepository.readAll();
+    public Iterable<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
     }
 
     @Override
-    public Optional<List<Transaction>> findByFilter(Predicate<Transaction> predicate) {
-        Optional<List<Transaction>> optionalTransactions = transactionRepository.readAll();
+    @Transactional
+    public Transaction updateTransaction(Long id, Float amount, Date date, String description, String type) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
 
-        return optionalTransactions
-                .map(transactions -> transactions.stream()
-                        .filter(predicate)
-                        .collect(Collectors.toList()))
-                .filter(filteredTransactions -> !filteredTransactions.isEmpty());
+        transaction.setAmount(amount);
+        transaction.setDate(date);
+        transaction.setDescription(description);
+        transaction.setType(type);
+
+        return transactionRepository.save(transaction);
     }
 
     @Override
-    public void deleteById(Long id) throws IllegalStateException {
-        transactionRepository.delete(id);
+    @Transactional
+    public void deleteTransaction(Long id) {
+        transactionRepository.deleteById(id);
     }
 }

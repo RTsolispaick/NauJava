@@ -1,4 +1,4 @@
-package ru.MaslovArtemy.NauJava.command;
+package ru.MaslovArtemy.NauJava.ui;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

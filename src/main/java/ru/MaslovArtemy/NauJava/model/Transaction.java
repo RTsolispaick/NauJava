@@ -1,94 +1,47 @@
 package ru.MaslovArtemy.NauJava.model;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * Представляет транзакцию для учета доходов и расходов пользователя.
- * Транзакция содержит информацию о сумме, категории, дате, типе и описании.
- * Класс является immutable благодаря использованию record.
- *
- * @param id          уникальный идентификатор транзакции
- * @param amount      сумма транзакции
- * @param category    категория, к которой относится транзакция
- * @param date        дата, когда была проведена транзакция
- * @param type        тип транзакции (доход или расход)
- * @param description описание транзакции
- */
-public record Transaction(Long id, Double amount, String category, LocalDate date, Type type, String description) {
+import java.util.Date;
 
-    /**
-     * Типы транзакций: доход или расход.
-     * Используется для обозначения положительных и отрицательных изменений в финансах.
-     */
-    public enum Type {
-        /**
-         * Доходная транзакция.
-         * Представляет положительное изменение в финансах.
-         */
-        INCOME("+", 1),
+@Setter @Getter
+@Entity
+public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        /**
-         * Расходная транзакция.
-         * Представляет отрицательное изменение в финансах.
-         */
-        EXPENSE("-", -1);
+    private Float amount;
 
-        private final String str;
-        private final Integer integer;
+    @Temporal(TemporalType.DATE)
+    private Date date;
 
-        /**
-         * Конструктор для типа транзакции.
-         *
-         * @param str символ, представляющий тип транзакции
-         * @param i   числовое представление типа (1 для доходов, -1 для расходов)
-         */
-        Type(String str, int i) {
-            this.str = str;
-            this.integer = i;
-        }
+    private String description;
+    private String type;
 
-        /**
-         * Получает символ, представляющий тип транзакции.
-         *
-         * @return строковое представление типа ("+" для доходов, "-" для расходов)
-         */
-        public String getStr() {
-            return str;
-        }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-        /**
-         * Получает числовое представление типа транзакции.
-         *
-         * @return 1 для доходов, -1 для расходов
-         */
-        public Integer getInteger() {
-            return integer;
-        }
+    @ManyToOne
+    @JoinColumn(name = "budget_id")
+    private Budget budget;
 
-        /**
-         * Преобразует строку в соответствующий тип транзакции.
-         *
-         * @param str строка, представляющая тип транзакции
-         * @return соответствующий {@code Type} (INCOME или EXPENSE)
-         * @throws IllegalArgumentException если строка не соответствует ни одному типу
-         */
-        public static Type fromString(String str) {
-            for (Type type : Type.values()) {
-                if (type.getStr().equals(str)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("Неизвестный тип: " + str);
-        }
-    }
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    /**
-     * Создает новую транзакцию с обновленным идентификатором.
-     *
-     * @param id новый уникальный идентификатор транзакции
-     * @return новая транзакция с обновленным идентификатором
-     */
-    public Transaction setId(Long id) {
-        return new Transaction(id, amount, category, date, type, description);
+    public Transaction() {}
+
+    public Transaction(Float amount, Date date, String description, String type, User user, Budget budget, Category category) {
+        this.amount = amount;
+        this.date = date;
+        this.description = description;
+        this.type = type;
+        this.user = user;
+        this.budget = budget;
+        this.category = category;
     }
 }

@@ -9,6 +9,8 @@ public interface CategoryService {
 
     Optional<Category> getCategoryById(Long id);
 
+    Optional<Category> getCategoryByName(String name);
+
     Iterable<Category> getAllCategories();
 
     Category updateCategory(Long id, String name, String description);

@@ -64,9 +64,4 @@ public class BudgetServiceImpl implements BudgetService {
     public void deleteBudget(Long id) {
         budgetRepository.deleteById(id);
     }
-
-    @Override
-    public List<Transaction> getTransactionsByBudgetId(Long budgetId) {
-        return budgetRepository.findTransactionsByBudgetId(budgetId);
-    }
 }

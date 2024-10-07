@@ -34,20 +34,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction createTransaction(Float amount, Date date, String description, String type, Long userId, Long budgetId, Long categoryId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Поиск бюджета по budgetId
-        Budget budget = budgetRepository.findById(budgetId)
+    public Transaction createTransaction(Float amount, Date date, String description, String type, User user, String budget, String category) {
+        Budget budget1 = budgetRepository.findByName(budget)
                 .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
 
-        // Поиск категории по categoryId
-        Category category = categoryRepository.findById(categoryId)
+        Category category1 = categoryRepository.findByName(category)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
 
-        // Создание и сохранение транзакции
-        Transaction transaction = new Transaction(amount, date, description, type, user, budget, category);
+        Transaction transaction = new Transaction(amount, date, description, type, user, budget1, category1);
         return transactionRepository.save(transaction);
     }
 

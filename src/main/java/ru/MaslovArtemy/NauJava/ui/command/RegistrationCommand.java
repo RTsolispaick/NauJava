@@ -43,7 +43,7 @@ public class RegistrationCommand implements Command {
 
         Optional<User> user = userService.getUserByName(login);
 
-        user.ifPresentOrElse(user1 -> printer.print("Данное имя занято! Попоробуй другое...\n"),
+        user.ifPresentOrElse(user1 -> printer.print("Данное имя занято! Попоробуйте другое...\n"),
                 () -> {
                     userService.createUser(login, password, new Date());
                     printer.print("Пользователь успешно создан!\n");

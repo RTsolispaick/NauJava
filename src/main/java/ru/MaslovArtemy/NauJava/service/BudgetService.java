@@ -18,6 +18,4 @@ public interface BudgetService {
     Budget updateBudget(Long id, String name, Float totalAmount, Date startDate, Date endDate);
 
     void deleteBudget(Long id);
-
-    List<Transaction> getTransactionsByBudgetId(Long budgetId);
 }

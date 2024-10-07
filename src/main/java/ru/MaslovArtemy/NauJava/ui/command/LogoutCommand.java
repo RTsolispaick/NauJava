@@ -23,7 +23,7 @@ public class LogoutCommand implements Command {
 
     @Override
     public void execute(String[] args) {
-        if (currentUser == null) {
+        if (currentUser.getUser() == null) {
             printer.print("Вы и так не находитесь в аккаунте!\n");
             return;
         }

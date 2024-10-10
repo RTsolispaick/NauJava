@@ -1,7 +1,6 @@
 package ru.MaslovArtemy.NauJava.repository;
 
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,16 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 public class TransactionRepositoryTest {
+    private final TransactionRepository transactionRepository;
+    private final EntityManager entityManager;
 
     @Autowired
-    private TransactionRepository transactionRepository;
-
-    @Autowired
-    private EntityManager entityManager;
-
-    @BeforeEach
-    public void setUp() {
-        transactionRepository.deleteAll();
+    public TransactionRepositoryTest(TransactionRepository transactionRepository, EntityManager entityManager) {
+        this.transactionRepository = transactionRepository;
+        this.entityManager = entityManager;
     }
 
     /**

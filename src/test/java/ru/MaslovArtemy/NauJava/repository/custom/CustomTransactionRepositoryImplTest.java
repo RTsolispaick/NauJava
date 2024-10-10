@@ -1,16 +1,9 @@
 package ru.MaslovArtemy.NauJava.repository.custom;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import ru.MaslovArtemy.NauJava.model.Category;
 import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
@@ -21,31 +14,16 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
+@DataJpaTest
 public class CustomTransactionRepositoryImplTest {
+    private final TransactionRepositoryCriteria customTransactionRepository;
+    private final EntityManager entityManager;
 
-    @Mock
-    private EntityManager entityManager;
-
-    @Mock
-    private CriteriaBuilder criteriaBuilder;
-
-    @Mock
-    private CriteriaQuery<Transaction> criteriaQuery;
-
-    @Mock
-    private Root<Transaction> root;
-
-    @InjectMocks
-    private CustomTransactionRepositoryImpl customTransactionRepository;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
-        when(criteriaBuilder.createQuery(Transaction.class)).thenReturn(criteriaQuery);
-        when(criteriaQuery.from(Transaction.class)).thenReturn(root);
+    @Autowired
+    public CustomTransactionRepositoryImplTest(TransactionRepositoryCriteria customTransactionRepository, EntityManager entityManager) {
+        this.customTransactionRepository = customTransactionRepository;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -53,18 +31,27 @@ public class CustomTransactionRepositoryImplTest {
      */
     @Test
     public void testFindTransactionsByDateAndUser() {
-        User user = new User();
-        Date date = new Date();
-        Transaction transaction1 = new Transaction();
-        Transaction transaction2 = new Transaction();
-        List<Transaction> expectedTransactions = Arrays.asList(transaction1, transaction2);
+        Date date1 = new Date();
+        User user1 = new User("Artem", "12345", date1);
+        entityManager.persist(user1);
 
-        Predicate datePredicate = criteriaBuilder.equal(root.get("date"), date);
-        Predicate userPredicate = criteriaBuilder.equal(root.get("user"), user);
+        Date date2 = new Date(123);
+        User user2 = new User("Vova", "54321", date2);
+        entityManager.persist(user2);
 
-        setupQueryWithPredicates(new Predicate[]{datePredicate, userPredicate}, expectedTransactions);
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(0.0f, date1, "some description", "+", user1, null, null),
+                new Transaction(0.0f, date2, "some description", "-", user2, null, null),
+                new Transaction(0.0f, date1, "some description", "+", user1, null, null),
+                new Transaction(0.0f, date2, "some description", "-", user1, null, null),
+                new Transaction(0.0f, date1, "some description", "-", user2, null, null)
+        );
 
-        List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByDateAndUser(date, user);
+        customTransactionRepository.saveAll(transactions);
+
+        List<Transaction> expectedTransactions = Arrays.asList(transactions.get(0), transactions.get(2));
+
+        List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByDateAndUser(date1, user1);
 
         assertEquals(expectedTransactions, actualTransactions);
     }
@@ -74,16 +61,22 @@ public class CustomTransactionRepositoryImplTest {
      */
     @Test
     public void testFindTransactionsByCategory() {
-        Category category = new Category();
-        Transaction transaction1 = new Transaction();
-        Transaction transaction2 = new Transaction();
-        List<Transaction> expectedTransactions = Arrays.asList(transaction1, transaction2);
+        Category category1 = new Category("some1", "description1");
+        entityManager.persist(category1);
+        Category category2 = new Category("some2", "description2");
+        entityManager.persist(category2);
 
-        Predicate categoryPredicate = criteriaBuilder.equal(root.get("category"), category);
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(0.0f, new Date(), "desc1", "+", null, null, category1),
+                new Transaction(0.0f, new Date(), "desc2", "-", null, null, category2),
+                new Transaction(0.0f, new Date(), "desc3", "+", null, null, category1)
+        );
 
-        setupQueryWithPredicate(categoryPredicate, expectedTransactions);
+        customTransactionRepository.saveAll(transactions);
 
-        List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByCategory(category);
+        List<Transaction> expectedTransactions = Arrays.asList(transactions.get(0), transactions.get(2));
+
+        List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByCategory(category1);
 
         assertEquals(expectedTransactions, actualTransactions);
     }
@@ -94,12 +87,44 @@ public class CustomTransactionRepositoryImplTest {
     @Test
     public void testFindTransactionsByDateAndUser_UserNotFound() {
         User user = new User();
+        entityManager.persist(user);
+
         Date date = new Date();
 
-        Predicate datePredicate = criteriaBuilder.equal(root.get("date"), date);
-        Predicate userPredicate = criteriaBuilder.equal(root.get("user"), user);
+        User user2 = new User();
+        entityManager.persist(user2);
 
-        setupQueryWithPredicates(new Predicate[]{datePredicate, userPredicate}, Collections.emptyList());
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(0.0f, new Date(), "desc1", "+", user2, null, null),
+                new Transaction(0.0f, new Date(), "desc2", "-", user2, null, null),
+                new Transaction(0.0f, new Date(), "desc3", "+", user2, null, null)
+        );
+
+        customTransactionRepository.saveAll(transactions);
+
+        List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByDateAndUser(date, user);
+
+        assertEquals(Collections.emptyList(), actualTransactions);
+    }
+
+    /**
+     * Тестирует получение транзакций по дате и пользователю, когда пользователь не найден.
+     */
+    @Test
+    public void testFindTransactionsByDateAndUser_DateNotFound() {
+        User user = new User();
+        entityManager.persist(user);
+
+        Date date = new Date();
+        Date date2 = new Date(123);
+
+        List<Transaction> transactions = Arrays.asList(
+                new Transaction(0.0f, date2, "desc1", "+", user, null, null),
+                new Transaction(0.0f, date2, "desc2", "-", user, null, null),
+                new Transaction(0.0f, date2, "desc3", "+", user, null, null)
+        );
+
+        customTransactionRepository.saveAll(transactions);
 
         List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByDateAndUser(date, user);
 
@@ -113,11 +138,7 @@ public class CustomTransactionRepositoryImplTest {
     public void testFindTransactionsByDateAndUser_NoTransactions() {
         User user = new User();
         Date date = new Date();
-
-        Predicate datePredicate = criteriaBuilder.equal(root.get("date"), date);
-        Predicate userPredicate = criteriaBuilder.equal(root.get("user"), user);
-
-        setupQueryWithPredicates(new Predicate[]{datePredicate, userPredicate}, Collections.emptyList());
+        entityManager.persist(user);
 
         List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByDateAndUser(date, user);
 
@@ -130,31 +151,10 @@ public class CustomTransactionRepositoryImplTest {
     @Test
     public void testFindTransactionsByCategory_NoTransactions() {
         Category category = new Category();
-
-        Predicate categoryPredicate = criteriaBuilder.equal(root.get("category"), category);
-
-        setupQueryWithPredicate(categoryPredicate, Collections.emptyList());
+        entityManager.persist(category);
 
         List<Transaction> actualTransactions = customTransactionRepository.findTransactionsByCategory(category);
 
         assertEquals(Collections.emptyList(), actualTransactions);
-    }
-
-    private void setupQueryWithPredicates(Predicate[] predicates, List<Transaction> expectedTransactions) {
-        when(criteriaQuery.where(predicates)).thenReturn(criteriaQuery);
-        when(criteriaQuery.select(root)).thenReturn(criteriaQuery);
-
-        TypedQuery<Transaction> typedQuery = mock(TypedQuery.class);
-        when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(expectedTransactions);
-    }
-
-    private void setupQueryWithPredicate(Predicate predicate, List<Transaction> expectedTransactions) {
-        when(criteriaQuery.where(predicate)).thenReturn(criteriaQuery);
-        when(criteriaQuery.select(root)).thenReturn(criteriaQuery);
-
-        TypedQuery<Transaction> typedQuery = mock(TypedQuery.class);
-        when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(expectedTransactions);
     }
 }

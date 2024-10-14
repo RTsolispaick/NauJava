@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @RepositoryRestResource(path = "category")
 public interface CategoryRepository extends CrudRepository<Category, Long> {
-    Optional<Category> findByName(String login);
+    Optional<Category> findByName(String name);
 }

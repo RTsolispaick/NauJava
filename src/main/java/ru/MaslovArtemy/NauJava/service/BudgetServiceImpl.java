@@ -4,13 +4,11 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.MaslovArtemy.NauJava.model.Budget;
-import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
 import ru.MaslovArtemy.NauJava.repository.BudgetRepository;
 import ru.MaslovArtemy.NauJava.repository.UserRepository;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Service

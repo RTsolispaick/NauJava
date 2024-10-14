@@ -10,24 +10,22 @@ import ru.MaslovArtemy.NauJava.model.User;
 import ru.MaslovArtemy.NauJava.repository.BudgetRepository;
 import ru.MaslovArtemy.NauJava.repository.CategoryRepository;
 import ru.MaslovArtemy.NauJava.repository.TransactionRepository;
-import ru.MaslovArtemy.NauJava.repository.UserRepository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
     private final BudgetRepository budgetRepository;
     private final CategoryRepository categoryRepository;
 
     @Autowired
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UserRepository userRepository,
-                                  BudgetRepository budgetRepository, CategoryRepository categoryRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, BudgetRepository budgetRepository,
+                                  CategoryRepository categoryRepository) {
         this.transactionRepository = transactionRepository;
-        this.userRepository = userRepository;
         this.budgetRepository = budgetRepository;
         this.categoryRepository = categoryRepository;
     }
@@ -48,6 +46,16 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Optional<Transaction> getTransactionById(Long id) {
         return transactionRepository.findById(id);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByCategory(Category category) {
+        return transactionRepository.getTransactionsByCategory(category);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByDateAndUser(Date date, User user) {
+        return transactionRepository.getTransactionsByDateAndUser(date, user);
     }
 
     @Override

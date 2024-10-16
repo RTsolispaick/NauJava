@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
-    @Query("SELECT t FROM Transaction t WHERE t.category = :category")
     List<Transaction> getTransactionsByCategory(Category category);
+    @Query("SELECT t FROM Transaction t JOIN t.user u WHERE t.date = :date AND u = :user")
     List<Transaction> getTransactionsByDateAndUser(Date date, User user);
 }

@@ -108,7 +108,7 @@ public class CustomTransactionRepositoryImplTest {
     }
 
     /**
-     * Тестирует получение транзакций по дате и пользователю, когда пользователь не найден.
+     * Тестирует получение транзакций по дате и пользователю, когда дата не найдена.
      */
     @Test
     public void testFindTransactionsByDateAndUser_DateNotFound() {

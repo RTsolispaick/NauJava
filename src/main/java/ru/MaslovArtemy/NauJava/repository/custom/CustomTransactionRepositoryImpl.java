@@ -26,23 +26,17 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
     @Override
     public List<Transaction> findTransactionsByDateAndUser(Date date, User user) {
-        // Получаем CriteriaBuilder для создания запросов
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // Создаем запрос CriteriaQuery
         CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
 
-        // Определяем корневую сущность, с которой работаем
         Root<Transaction> transaction = cq.from(Transaction.class);
 
-        // Устанавливаем условия запроса (date = :date и user = :user)
         Predicate datePredicate = cb.equal(transaction.get("date"), date);
         Predicate userPredicate = cb.equal(transaction.get("user"), user);
 
-        // Собираем запрос
         cq.where(cb.and(datePredicate, userPredicate));
-
-        // Выполняем запрос и возвращаем результат
+        
         return entityManager.createQuery(cq).getResultList();
     }
 

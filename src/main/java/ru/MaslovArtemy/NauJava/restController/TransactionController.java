@@ -1,10 +1,8 @@
 package ru.MaslovArtemy.NauJava.restController;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.MaslovArtemy.NauJava.model.Category;
 import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
@@ -35,7 +33,7 @@ public class TransactionController {
     }
 
     @GetMapping("/getByDateAndUser")
-    public List<Transaction> getTransactionsByDateAndUser(@RequestParam String date, @RequestParam String nameUser) {
+    public List<Transaction> getTransactionsByDateAndUser(@RequestParam String date, @RequestParam String nameUser) throws ParseException {
         Optional<User> userOptional = userService.getUserByName(nameUser);
 
         if (userOptional.isEmpty()) {
@@ -45,12 +43,8 @@ public class TransactionController {
         User user = userOptional.get();
 
         Date transactionDate;
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            transactionDate = dateFormat.parse(date);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Некорректный формат даты: " + date);
-        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        transactionDate = dateFormat.parse(date);
 
         return transactionService.getTransactionsByDateAndUser(transactionDate, user);
     }
@@ -66,5 +60,29 @@ public class TransactionController {
         Category category = categoryOptional.get();
 
         return transactionService.getTransactionsByCategory(category);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Exception exceptionServer(Exception e) {
+        Exception exception = new Exception(e.getMessage());
+        exception.setStackTrace(new StackTraceElement[] {});
+        return exception;
+    }
+
+    @ExceptionHandler(ParseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Exception exceptionParseDate() {
+        Exception exception = new Exception("Некорректный формат даты в запросе!");
+        exception.setStackTrace(new StackTraceElement[] {});
+        return exception;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Exception exceptionCategoryNotFound(Exception e) {
+        Exception exception = new Exception(e.getMessage());
+        exception.setStackTrace(new StackTraceElement[] {});
+        return exception;
     }
 }

@@ -1,4 +1,4 @@
-package ru.MaslovArtemy.NauJava.ui;
+package ru.MaslovArtemy.NauJava.configs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.MaslovArtemy.NauJava.output.Printer;
+import ru.MaslovArtemy.NauJava.ui.CommandProcessor;
 
 import java.util.Scanner;
 

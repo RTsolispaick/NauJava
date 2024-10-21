@@ -46,7 +46,7 @@ public class LoginCommand implements Command {
         user.ifPresentOrElse(user1 -> {
             if (password.equals(user1.getPassword())) {
                 currentUser.setUser(user1);
-                printer.print("Вход в аккаунт " + user1.getName() + " выполнен!\n");
+                printer.print("Вход в аккаунт " + user1.getUsername() + " выполнен!\n");
             } else {
                 printer.print("Неверный логин или пароль!\n");
             }

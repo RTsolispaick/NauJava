@@ -2,11 +2,10 @@ package ru.MaslovArtemy.NauJava.service;
 
 import ru.MaslovArtemy.NauJava.model.User;
 
-import java.util.Date;
 import java.util.Optional;
 
 public interface UserService {
-    User createUser(String name, String password, Date registrationDate);
+    User createUser(User user);
 
     Optional<User> getUserById(Long id);
 
@@ -14,7 +13,7 @@ public interface UserService {
 
     Iterable<User> getAllUsers();
 
-    User updateUser(Long id, String name, String password);
+    User updateUser(User user);
 
-    void deleteUser(Long id);
+    void deleteUser(User user);
 }

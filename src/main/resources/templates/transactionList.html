@@ -19,12 +19,12 @@
     <tr th:each="transaction : ${transactions}">
         <td th:text="${transaction.id}"></td>
         <td th:text="${transaction.amount}"></td>
-        <td th:text="${#dates.format(transaction.date, 'yyyy-MM-dd')}"></td> <!-- Форматируем дату -->
+        <td th:text="${#dates.format(transaction.date, 'yyyy-MM-dd')}"></td>
         <td th:text="${transaction.description}"></td>
         <td th:text="${transaction.type}"></td>
-        <td th:text="${transaction.user.name}"></td> <!-- Отображаем имя пользователя -->
-        <td th:text="${transaction.budget.name}"></td> <!-- Отображаем имя бюджета -->
-        <td th:text="${transaction.category.name}"></td> <!-- Отображаем имя категории -->
+        <td th:text="${transaction.user.name}"></td>
+        <td th:text="${transaction.budget.name}"></td>
+        <td th:text="${transaction.category.name}"></td>
     </tr>
 </table>
 </body>

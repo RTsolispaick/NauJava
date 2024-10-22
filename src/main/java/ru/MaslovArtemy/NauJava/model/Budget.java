@@ -1,5 +1,6 @@
 package ru.MaslovArtemy.NauJava.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,9 +27,11 @@ public class Budget {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "budget")
+    @OneToMany(mappedBy = "budget", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Transaction> transactions;
 
     // Пустой конструктор

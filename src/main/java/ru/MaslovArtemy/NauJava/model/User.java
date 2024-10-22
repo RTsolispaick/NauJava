@@ -1,5 +1,6 @@
 package ru.MaslovArtemy.NauJava.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,12 +25,15 @@ public class User {
     private Date registrationDate;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Budget> budgets;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Goal> goals;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Transaction> transactions;
 
     public User() {}

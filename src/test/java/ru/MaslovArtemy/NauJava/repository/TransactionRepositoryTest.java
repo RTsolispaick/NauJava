@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import ru.MaslovArtemy.NauJava.model.Category;
+import ru.MaslovArtemy.NauJava.model.Role;
 import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -60,11 +58,13 @@ public class TransactionRepositoryTest {
     @Test
     public void testGetTransactionsByDateAndUser() {
         User user1 = new User();
-        user1.setName("Test User1");
+        user1.setUsername("Test User1");
+        user1.setRoles(Set.of(Role.USER));
         entityManager.persist(user1);
 
         User user2 = new User();
-        user2.setName("Test User2");
+        user2.setUsername("Test User2");
+        user2.setRoles(Set.of(Role.USER));
         entityManager.persist(user2);
 
         Date date = new Date();
@@ -111,7 +111,8 @@ public class TransactionRepositoryTest {
     @Test
     public void testGetTransactionsByDateAndUser_NoTransactions() {
         User user = new User();
-        user.setName("Non-existent User");
+        user.setUsername("Non-existent User");
+        user.setRoles(Set.of(Role.USER));
         entityManager.persist(user);
 
         Date date = new Date();

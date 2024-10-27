@@ -8,10 +8,7 @@ import ru.MaslovArtemy.NauJava.model.Category;
 import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -40,11 +37,11 @@ public class CustomTransactionRepositoryImplTest {
         entityManager.persist(user2);
 
         List<Transaction> transactions = Arrays.asList(
-                new Transaction(0.0f, date1, "some description", "+", user1, null, null),
-                new Transaction(0.0f, date2, "some description", "-", user2, null, null),
-                new Transaction(0.0f, date1, "some description", "+", user1, null, null),
-                new Transaction(0.0f, date2, "some description", "-", user1, null, null),
-                new Transaction(0.0f, date1, "some description", "-", user2, null, null)
+                new Transaction(0.0, date1, "some description", "+", user1, null, null),
+                new Transaction(0.0, date2, "some description", "-", user2, null, null),
+                new Transaction(0.0, date1, "some description", "+", user1, null, null),
+                new Transaction(0.0, date2, "some description", "-", user1, null, null),
+                new Transaction(0.0, date1, "some description", "-", user2, null, null)
         );
 
         customTransactionRepository.saveAll(transactions);
@@ -67,9 +64,9 @@ public class CustomTransactionRepositoryImplTest {
         entityManager.persist(category2);
 
         List<Transaction> transactions = Arrays.asList(
-                new Transaction(0.0f, new Date(), "desc1", "+", null, null, category1),
-                new Transaction(0.0f, new Date(), "desc2", "-", null, null, category2),
-                new Transaction(0.0f, new Date(), "desc3", "+", null, null, category1)
+                new Transaction(0.0, new Date(), "desc1", "+", null, null, category1),
+                new Transaction(0.0, new Date(), "desc2", "-", null, null, category2),
+                new Transaction(0.0, new Date(), "desc3", "+", null, null, category1)
         );
 
         customTransactionRepository.saveAll(transactions);
@@ -95,9 +92,9 @@ public class CustomTransactionRepositoryImplTest {
         entityManager.persist(user2);
 
         List<Transaction> transactions = Arrays.asList(
-                new Transaction(0.0f, new Date(), "desc1", "+", user2, null, null),
-                new Transaction(0.0f, new Date(), "desc2", "-", user2, null, null),
-                new Transaction(0.0f, new Date(), "desc3", "+", user2, null, null)
+                new Transaction(0.0, new Date(), "desc1", "+", user2, null, null),
+                new Transaction(0.0, new Date(), "desc2", "-", user2, null, null),
+                new Transaction(0.0, new Date(), "desc3", "+", user2, null, null)
         );
 
         customTransactionRepository.saveAll(transactions);
@@ -119,9 +116,9 @@ public class CustomTransactionRepositoryImplTest {
         Date date2 = new Date(123);
 
         List<Transaction> transactions = Arrays.asList(
-                new Transaction(0.0f, date2, "desc1", "+", user, null, null),
-                new Transaction(0.0f, date2, "desc2", "-", user, null, null),
-                new Transaction(0.0f, date2, "desc3", "+", user, null, null)
+                new Transaction(0.0, date2, "desc1", "+", user, null, null),
+                new Transaction(0.0, date2, "desc2", "-", user, null, null),
+                new Transaction(0.0, date2, "desc3", "+", user, null, null)
         );
 
         customTransactionRepository.saveAll(transactions);

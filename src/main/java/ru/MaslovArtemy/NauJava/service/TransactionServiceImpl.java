@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.MaslovArtemy.NauJava.model.Budget;
 import ru.MaslovArtemy.NauJava.model.Category;
+import ru.MaslovArtemy.NauJava.model.DTO.TransactionDTO;
 import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.model.User;
 import ru.MaslovArtemy.NauJava.repository.BudgetRepository;
@@ -14,6 +15,7 @@ import ru.MaslovArtemy.NauJava.repository.TransactionRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -32,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction createTransaction(Float amount, Date date, String description, String type, User user, String budget, String category) {
+    public Transaction createTransaction(Double amount, Date date, String description, String type, User user, String budget, String category) {
         Budget budget1 = budgetRepository.findByName(budget)
                 .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
 
@@ -49,13 +51,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getTransactionsByCategory(Category category) {
-        return transactionRepository.getTransactionsByCategory(category);
+    public List<TransactionDTO> getTransactionsByCategory(Category category) {
+        return transactionRepository.getTransactionsByCategory(category).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Transaction> getTransactionsByDateAndUser(Date date, User user) {
-        return transactionRepository.getTransactionsByDateAndUser(date, user);
+    public List<TransactionDTO> getTransactionsByDateAndUser(Date date, User user) {
+        return transactionRepository.getTransactionsByDateAndUser(date, user).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -65,7 +71,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction updateTransaction(Long id, Float amount, Date date, String description, String type) {
+    public Transaction updateTransaction(Long id, Double amount, Date date, String description, String type) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
 
@@ -81,5 +87,18 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public void deleteTransaction(Long id) {
         transactionRepository.deleteById(id);
+    }
+
+    private TransactionDTO convertToDTO(Transaction transaction) {
+        return new TransactionDTO(
+                transaction.getId(),
+                transaction.getAmount(),
+                transaction.getDate(),
+                transaction.getDescription(),
+                transaction.getType(),
+                transaction.getUser().getId(),
+                transaction.getBudget().getId(),
+                transaction.getCategory().getId()
+        );
     }
 }

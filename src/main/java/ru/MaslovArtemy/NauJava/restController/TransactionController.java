@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.MaslovArtemy.NauJava.model.Category;
-import ru.MaslovArtemy.NauJava.model.Transaction;
+import ru.MaslovArtemy.NauJava.model.DTO.TransactionDTO;
 import ru.MaslovArtemy.NauJava.model.User;
 import ru.MaslovArtemy.NauJava.service.CategoryService;
 import ru.MaslovArtemy.NauJava.service.TransactionService;
@@ -33,7 +33,7 @@ public class TransactionController {
     }
 
     @GetMapping("/getByDateAndUser")
-    public List<Transaction> getTransactionsByDateAndUser(@RequestParam String date, @RequestParam String nameUser) throws ParseException {
+    public List<TransactionDTO> getTransactionsByDateAndUser(@RequestParam String date, @RequestParam String nameUser) throws ParseException {
         Optional<User> userOptional = userService.getUserByName(nameUser);
 
         if (userOptional.isEmpty()) {
@@ -50,7 +50,7 @@ public class TransactionController {
     }
 
     @GetMapping("/getByCategory")
-    public List<Transaction> getTransactionsByCategory(@RequestParam String categoryName) {
+    public List<TransactionDTO> getTransactionsByCategory(@RequestParam String categoryName) {
         Optional<Category> categoryOptional = categoryService.getCategoryByName(categoryName);
 
         if (categoryOptional.isEmpty()) {

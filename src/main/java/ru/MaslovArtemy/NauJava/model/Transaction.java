@@ -13,7 +13,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Float amount;
+    private Double amount;
 
     @Temporal(TemporalType.DATE)
     private Date date;
@@ -35,7 +35,7 @@ public class Transaction {
 
     public Transaction() {}
 
-    public Transaction(Float amount, Date date, String description, String type, User user, Budget budget, Category category) {
+    public Transaction(Double amount, Date date, String description, String type, User user, Budget budget, Category category) {
         this.amount = amount;
         this.date = date;
         this.description = description;

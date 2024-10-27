@@ -33,15 +33,17 @@ public class AddTransactionCommand implements Command {
     @Override
     public void execute(String[] args) {
         if (args.length < 6) {
-            printer.print("Недостаточно аргументов.\n" +
-                    "Использование: addTransaction <сумма> <дата> <описание> <тип>('+', '-') <budgetId> <category>\n");
+            printer.print("""
+                    Недостаточно аргументов.
+                    Использование: addTransaction <сумма> <дата> <описание> <тип>('+', '-') <budgetId> <category>
+                    """);
             return;
         } else if (currentUser.getUser() == null) {
             printer.print("Перед добавлением транзакции войдите в аккаунт!\n");
         }
 
         try {
-            Float amount = Float.parseFloat(args[0]);
+            Double amount = Double.parseDouble(args[0]);
             Date date = new SimpleDateFormat("yyyy-MM-dd").parse(args[1]);
             String description = args[2];
             String type = args[3];

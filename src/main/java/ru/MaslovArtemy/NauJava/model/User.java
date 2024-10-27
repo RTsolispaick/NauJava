@@ -3,6 +3,8 @@ package ru.MaslovArtemy.NauJava.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -22,8 +24,11 @@ public class User {
 
     private String password;
 
+    @ElementCollection(targetClass = Role.class)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Fetch(FetchMode.JOIN)
     private Set<Role> roles;
 
     @Temporal(TemporalType.DATE)

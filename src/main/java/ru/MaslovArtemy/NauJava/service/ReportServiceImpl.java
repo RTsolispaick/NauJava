@@ -8,7 +8,6 @@ import ru.MaslovArtemy.NauJava.model.Transaction;
 import ru.MaslovArtemy.NauJava.repository.ReportRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
@@ -27,16 +26,14 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public String getReportContent(Long reportId) {
-        Optional<Report> report = reportRepository.findById(reportId);
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Отчет с id " + reportId + " не найден"));
 
-        if (report.isPresent()) {
-            if (report.get().getStatus() == ReportStatus.COMPLETED) {
-                return report.get().getContent();
-            } else {
-                return "Отчет еще формируется или завершен с ошибкой.";
-            }
-        }
-        return "Отчёт не найден!";
+        return switch (report.getStatus()) {
+            case ReportStatus.COMPLETED -> report.getContent();
+            case ReportStatus.CREATED -> "Отчёт не сформирован!";
+            case ReportStatus.ERROR -> "Ошибка при формировании отчёта!";
+        };
     }
 
     @Override
@@ -84,6 +81,7 @@ public class ReportServiceImpl implements ReportService {
     private void updateReportStatus(Long reportId, ReportStatus status, String content) {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new IllegalArgumentException("Отчет с id " + reportId + " не найден"));
+
         report.setStatus(status);
         report.setContent(content);
         reportRepository.save(report);
@@ -94,11 +92,14 @@ public class ReportServiceImpl implements ReportService {
         htmlBuilder.append("<html><body>");
         htmlBuilder.append("<h1>Отчет статистики приложения</h1>");
         htmlBuilder.append("<p>Количество зарегистрированных пользователей: ").append(userCount.result()).append("</p>");
-        htmlBuilder.append("<h2>Список объектов</h2>");
+        htmlBuilder.append("<h2>Список транзакций</h2>");
         htmlBuilder.append("<table border='1'>");
-        htmlBuilder.append("<tr><th>ID</th><th>Описание</th></tr>");
+        htmlBuilder.append("<tr><th>ID</th><th>Сумма</th><th>Дата</th><th>Описание</th></tr>");
+
         for (Transaction transaction : transactions.result()) {
             htmlBuilder.append("<tr><td>").append(transaction.getId()).append("</td>")
+                    .append("<td>").append(transaction.getAmount()).append("</td>")
+                    .append("<td>").append(transaction.getDate()).append("</td>")
                     .append("<td>").append(transaction.getDescription()).append("</td></tr>");
         }
         htmlBuilder.append("</table>");

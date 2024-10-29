@@ -1,12 +1,15 @@
 package ru.MaslovArtemy.NauJava.restController;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.MaslovArtemy.NauJava.service.ReportService;
 
+import java.util.Arrays;
+
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/custom/reports")
 public class ReportController {
     private final ReportService reportService;
 
@@ -25,5 +28,13 @@ public class ReportController {
     @GetMapping("/{id}")
     public ResponseEntity<String> getReportContentById(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.getReportContent(id));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Exception exceptionCategoryNotFound(Exception e) {
+        Exception exception = new Exception(e.getMessage());
+        exception.setStackTrace(Arrays.stream(e.getStackTrace()).limit(5).toArray(StackTraceElement[]::new));
+        return exception;
     }
 }

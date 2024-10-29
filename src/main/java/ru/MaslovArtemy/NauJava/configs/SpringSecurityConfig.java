@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -20,15 +21,13 @@ public class SpringSecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .failureUrl("/registration")
-                        .defaultSuccessUrl("/home", true)
+                        .successHandler(authenticationSuccessHandler())
                         .permitAll()
                 )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/registration").permitAll()
                         .requestMatchers("/swagger-ui/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
 
@@ -42,6 +41,18 @@ public class SpringSecurityConfig {
 
 
         return httpSecurity.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            if (authentication.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+                response.sendRedirect("/swagger-ui/index.html");
+            } else {
+                response.sendRedirect("/home");
+            }
+        };
     }
 
     @Bean

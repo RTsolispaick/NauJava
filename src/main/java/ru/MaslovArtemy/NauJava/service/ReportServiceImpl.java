@@ -9,6 +9,8 @@ import ru.MaslovArtemy.NauJava.repository.ReportRepository;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -49,29 +51,41 @@ public class ReportServiceImpl implements ReportService {
         return CompletableFuture.runAsync(() -> {
             long startTime = System.currentTimeMillis();
 
-            CompletableFuture<QueryResult<Long>> userCountFuture = CompletableFuture.supplyAsync(() -> {
+            AtomicLong userCount = new AtomicLong();
+            AtomicLong userElapsedTime = new AtomicLong();
+            AtomicReference<List<Transaction>> transactions = new AtomicReference<>();
+            AtomicLong transactionElapsedTime = new AtomicLong();
+
+            Thread userCountThread = new Thread(() -> {
                 long userStartTime = System.currentTimeMillis();
-                Long userCount = StreamSupport.stream(userService.getAllUsers().spliterator(), false).count();
-                long userElapsedTime = System.currentTimeMillis() - userStartTime;
-
-                return new QueryResult<>(userCount, userElapsedTime);
+                userCount.set(StreamSupport.stream(userService.getAllUsers().spliterator(), false).count());
+                userElapsedTime.set(System.currentTimeMillis() - userStartTime);
             });
 
-            CompletableFuture<QueryResult<List<Transaction>>> transactionListFuture = CompletableFuture.supplyAsync(() -> {
+
+            Thread transactionListThread = new Thread(() -> {
                 long transactionStartTime = System.currentTimeMillis();
-                List<Transaction> transactions = (List<Transaction>) transactionService.getAllTransactions();
-                long transactionElapsedTime = System.currentTimeMillis() - transactionStartTime;
-
-                return new QueryResult<>(transactions, transactionElapsedTime);
+                transactions.set((List<Transaction>) transactionService.getAllTransactions());
+                transactionElapsedTime.set(System.currentTimeMillis() - transactionStartTime);
             });
+
+            userCountThread.start();
+            transactionListThread.start();
 
             try {
-                QueryResult<Long> userCount = userCountFuture.join();
-                QueryResult<List<Transaction>> transactions = transactionListFuture.join();
+                userCountThread.join();
+                transactionListThread.join();
+
                 long totalElapsedTime = System.currentTimeMillis() - startTime;
 
-                String reportContent = generateHtmlReport(userCount, transactions, totalElapsedTime);
+                String reportContent = generateHtmlReport(
+                        userCount.get(), userElapsedTime.get(),
+                        transactions.get(), transactionElapsedTime.get(),
+                        totalElapsedTime);
                 updateReportStatus(reportId, ReportStatus.COMPLETED, reportContent);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Восстанавливаем статус прерывания
+                updateReportStatus(reportId, ReportStatus.ERROR, e.getMessage());
             } catch (Exception e) {
                 updateReportStatus(reportId, ReportStatus.ERROR, e.getMessage());
             }
@@ -87,16 +101,18 @@ public class ReportServiceImpl implements ReportService {
         reportRepository.save(report);
     }
 
-    private String generateHtmlReport(QueryResult<Long> userCount, QueryResult<List<Transaction>> transactions, long totalElapsedTime) {
+    private String generateHtmlReport(Long userCount, Long userQueryTime,
+                                      List<Transaction> transactions, Long transactionsQueryTime,
+                                      Long totalElapsedTime) {
         StringBuilder htmlBuilder = new StringBuilder();
         htmlBuilder.append("<html><body>");
         htmlBuilder.append("<h1>Отчет статистики приложения</h1>");
-        htmlBuilder.append("<p>Количество зарегистрированных пользователей: ").append(userCount.result()).append("</p>");
+        htmlBuilder.append("<p>Количество зарегистрированных пользователей: ").append(userCount).append("</p>");
         htmlBuilder.append("<h2>Список транзакций</h2>");
         htmlBuilder.append("<table border='1'>");
         htmlBuilder.append("<tr><th>ID</th><th>Сумма</th><th>Дата</th><th>Описание</th></tr>");
 
-        for (Transaction transaction : transactions.result()) {
+        for (Transaction transaction : transactions) {
             htmlBuilder.append("<tr><td>").append(transaction.getId()).append("</td>")
                     .append("<td>").append(transaction.getAmount()).append("</td>")
                     .append("<td>").append(transaction.getDate()).append("</td>")
@@ -104,12 +120,10 @@ public class ReportServiceImpl implements ReportService {
         }
         htmlBuilder.append("</table>");
 
-        htmlBuilder.append("<p>Время подсчёта пользователей: ").append(userCount.executionTime()).append(" ms</p>");
-        htmlBuilder.append("<p>Время получения всех транзакций: ").append(transactions.executionTime()).append(" ms</p>");
+        htmlBuilder.append("<p>Время подсчёта пользователей: ").append(userQueryTime).append(" ms</p>");
+        htmlBuilder.append("<p>Время получения всех транзакций: ").append(transactionsQueryTime).append(" ms</p>");
         htmlBuilder.append("<p>Общее время формирования отчета: ").append(totalElapsedTime).append(" ms</p>");
         htmlBuilder.append("</body></html>");
         return htmlBuilder.toString();
     }
-
-    private record QueryResult<T>(T result, long executionTime) {}
 }
